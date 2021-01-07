@@ -46,6 +46,8 @@ void do_more(int fd,int len){
 }
 
 int main(int ac,char*av[]){
+
+	setbuf(stdin,NULL);
 	int fd=open(av[1],O_RDWR);
 	do_more(fd,4);
 }
