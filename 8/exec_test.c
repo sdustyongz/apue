@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 char * env_init[]={"USER=unknow","PATH=/tmp",NULL};
 
@@ -17,7 +18,7 @@ int main(void){
 	if((pid=fork())<0)
 		perror("fork() error");
 	else if(pid==0){
-		if(execl("b.out","b.out","arg1","abc",(char*)0)<0)
+		if(execlp("b.out","b.out","arg1","abc",(char*)0)<0)
 			perror("excle fail");
 	}
 

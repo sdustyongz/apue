@@ -4,7 +4,8 @@
 #include <setjmp.h>
 #include "pr_mask.c"
 
-static sigjmp_buf jmpbuf;
+//static sigjmp_buf jmpbuf;
+static jmp_buf jmpbuf;
 static volatile sig_atomic_t canjump;
 
 void sig_usr1(int signo){
@@ -19,7 +20,8 @@ void sig_usr1(int signo){
 			break;
 	pr_mask("finishing sig_usr1:");
 	canjump=0;
-	siglongjmp(jmpbuf,1);
+	//siglongjmp(jmpbuf,1);
+	longjmp(jmpbuf,1);
 }
 
 void sig_alarm(int signo){
@@ -32,7 +34,7 @@ int main(){
 	if(signal(SIGALRM,sig_alarm)==SIG_ERR)
 		perror("signal SIGALRM error");
 	pr_mask("starting main:");
-	if(sigsetjmp(jmpbuf,1)){
+	if(setjmp(jmpbuf)){
 		pr_mask("ending main:");
 		exit(0);
 	}

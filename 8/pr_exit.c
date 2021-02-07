@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 void pr_exit(int status){
 	if(WIFEXITED(status))
