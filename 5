@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+#define BSZ 48
+
+int main(int ac,char * av[]){
+    FILE * fp;
+    char buf[BSZ];
+    memset(buf,'a',BSZ-2);
+    buf[BSZ-2] = '\0';
+    buf[BSZ-1] = 'X';
+
+    if((fp = fmemopen(buf,BSZ,"w+")) == NULL)
+        printf("fmemopen error");
+    fprintf(fp,"hello world");
+    fflush(fp);
+    printf("after write : %s\n",buf);
+
+    memset(buf,'b',BSZ-2);
+    buf[BSZ-2] = '\0';
+    buf[BSZ-1] = 'X';
+    fprintf(fp,"hello world");
+    fflush(fp);
+    printf("after b memset %s\n",buf);
+
+
+    memset(buf,'c',BSZ-2);
+    buf[BSZ-2] = '\0';
+    buf[BSZ-1] = 'X';
+    fseek(fp,0,SEEK_SET);
+    fprintf(fp,"hello word");
+    fclose(fp);
+    printf("after b memset %s\n",buf);
+}
