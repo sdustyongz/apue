@@ -59,15 +59,14 @@ int main(int argc, char *argv[]){
             }
             close(fd[0]);
         }
+
         if((pager = getenv("PAGER")) == NULL)
             pager = DEF_PAGER;
-        printf("execl %s \n",pager);
         if((argv0 = strrchr(pager,'/')) != NULL)
             argv0++;
         else 
             argv0 = pager;
         
-        printf("execl %s \n",pager);
         if(execl(pager,argv0,(char*)0) < 0){
             printf("execl pager error\n");
             exit(1);
