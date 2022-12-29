@@ -11,6 +11,8 @@ typedef struct barrier_t {
     unsigned int count;
     unsigned int times_used;
 
+    short int full_flag;
+
 } barrier_t;
 
 int barrier_init(barrier_t * barrier, unsigned int num_threads){
@@ -20,24 +22,34 @@ int barrier_init(barrier_t * barrier, unsigned int num_threads){
     barrier->n_threads = num_threads;
     barrier->count = 0;
     barrier->times_used = 0;
+    barrier->full_flag = 0;
     return 0;
 }
 
 int barrier_wait(barrier_t * barrier){
     pthread_mutex_lock(&barrier->mtx);
-
+    while(barrier->full_flag)
+        pthread_cond_wait(&barrier->cv, &barrier->mtx);
     barrier->count++;
-    while(barrier->count < barrier->n_threads){
+//    printf("barrier_count: %d\n",barrier->count);
+    if(barrier->count == barrier->n_threads){
+        barrier->full_flag  = 1;
+        pthread_cond_broadcast(&barrier->cv);
+    }
+    while(!barrier->full_flag ){
         pthread_cond_wait(&barrier->cv, &barrier->mtx);
     }
     
-    if(++barrier->count  < barrier->n_threads){
-        while(barrier->count < barrier->n_threads)
-            pthread_cond_wait(&barrier->mtx,&barrier->cv);
-    }else{
-        
+    //if(barrier->count == barrier->n_threads){
+    //    barrier->full_flag  = 0;
+    //    pthread_cond_broadcast(&barrier->cv);
+   // }
+
+    if(--barrier->count  == 0){
+        barrier->full_flag =0;
         pthread_cond_broadcast(&barrier->cv);
-    }
+    } 
+    
     pthread_mutex_unlock(&barrier->mtx);
     return 0;
 }
