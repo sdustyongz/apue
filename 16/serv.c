@@ -39,4 +39,21 @@ void serve(int sockfd){
     int clfd;
     FILE *fp;
     char buf[BUFLEN];
+
+    for(;;){
+        if((clfd = accept(sockfd,NULL,NULL)) < 0){
+            syslog(LOG_ERR,"ruptimed:aactpt error %s",strerror(errno));
+            exit(1);
+        }
+
+        if((fp = popen("/usr/bin/uptime","r")) == NULL){
+            sprintf(buf, "error: %s\n", strerror(errno));
+            send(clfd, buf, strlen(buf), 0);
+        }else{
+            while(fgets(buf,BUFLEN,fp) != NULL)
+                send(clfd, buf, strlen(buf), 0);
+            pclose(fp);
+        }
+
+    }
 }
