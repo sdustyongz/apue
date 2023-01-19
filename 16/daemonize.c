@@ -3,6 +3,8 @@
 #include <fcntl.h>
 #include <sys/resource.h>
 #include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 void daemonize(char * cmd){
     int i, fd0, fd1, fd2;

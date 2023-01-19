@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
 
 #define  MAXLINE 1024
 
@@ -52,4 +53,10 @@ int main(int argc, char *argv[]){
 
     }
     endnetent();
+
+    char host[1024];
+
+    gethostname(host,1024);
+
+    printf("%s\n",host);
 }
