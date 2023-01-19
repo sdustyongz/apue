@@ -5,6 +5,7 @@
 #include <poll.h>
 #include <sys/socket.h>
 #include <pthread.h>
+#include <string.h>
 
 #define NQ 3
 #define MAXMSZ 512
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]){
     int qid[NQ];
     struct threadinfo ti[NQ];
     struct pollfd pfd[NQ];
-    ptrehad_t tid[NQ];
+    pthread_t tid[NQ];
     char buf[MAXMSZ];
 
     for(i = 0; i < NQ; i++){
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]){
         pfd[i].fd = fd[1];
         pfd[i].events = POLLIN;
 
-        if((err = pthread_create(&tid[i], NULL, helper, (void *)ti[i])) !=0){
+        if((err = pthread_create(&tid[i], NULL, helper, (void *)&ti[i])) !=0){
             printf("pthread create error\n");
             exit(1);
         }
