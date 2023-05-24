@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
 
     if(pid == 0){
         write(fd,"1234",4);
+        close(fd);
         exit(0);
     }
 

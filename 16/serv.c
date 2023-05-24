@@ -102,7 +102,6 @@ int main(int argc, char * argv[]){
         ina.s_addr = htonl(INADDR_ANY);
         in.sin_addr = ina;
         in.sin_port = htons(9005);
-        if((sockfd = initserver(SOCK_STREAM,&in,sizeof(struct sockaddr_in), QLEN)) >=0 ){
                 serve(sockfd);
                 exit(0);
         }
