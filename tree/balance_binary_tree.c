@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 struct node {
     long  key;
@@ -28,7 +29,7 @@ Node * create_node(int key ,void * value){
 
 int node_height(Node * node){
     if(node == NULL) return 0;
-    int max_height = 1;
+    int max_height = 0;
     if(node->left != NULL ){
         max_height = node->left->height;
     }
@@ -60,25 +61,36 @@ int height_diff(Node * node){
 }
 
 Node * right_rotate(Node * node){
-    
-    node->left->parent = node->parent;
-    node->left = node->left->right;
+    Node * lk = node->left;
+    lk->parent = node->parent;
+    if(node->parent->right == node)
+            node->parent->right= lk;
+    else  node->parent->left =lk;
+     node->parent->left = node->left;
+    node->left = lk->right;
     if(node->left != NULL)
         node->left->parent = node;
-    node->parent = node->left;
+    node->parent = lk;
+    lk->right = node;
     node_height(node);
     node_height(node->parent);
     return node->parent;
 }
 
 Node * left_rotate(Node * node){
-    node->right->parent = node->parent;
-    node->right = node->right->left;
+    Node * rk  = node->right;
+    rk->parent = node->parent;
+    if(node->parent->right == node)
+            node->parent->right= rk;
+    else  node->parent->left =rk;
+    node->right = rk->left;
     if(node->right != NULL)
         node->right->parent = node;
-    node->parent = node->right;
+  
+    node->parent = rk;
+    rk->left = node;
     node_height(node);
-    node_height(node->parent);
+    node_height(rk);
     return node->parent;
 }
 
@@ -110,8 +122,8 @@ Node * insert(Node *root, int key,void * value){
        return root; 
     }
     int height = 1;
-    Node * k;
-    while((k = root) != NULL){
+    Node * k  =root;
+    while(k  != NULL){
         if(k->key == key)
             return k;
         if(k->key < key){
