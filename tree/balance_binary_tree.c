@@ -80,9 +80,9 @@ Node * right_rotate(Node * node){
 Node * left_rotate(Node * node){
     Node * rk  = node->right;
     rk->parent = node->parent;
-    if(node->parent->right == node)
+    if(node->parent  && (node->parent->right == node))
             node->parent->right= rk;
-    else  node->parent->left =rk;
+    else if(node->parent) node->parent->left =rk;
     node->right = rk->left;
     if(node->right != NULL)
         node->right->parent = node;
@@ -106,7 +106,7 @@ void rotate(Node * k, Node * inserted_node){
         if(inserted_node->parent->right == inserted_node){
             left_rotate(k);
         }else{
-            right_rotate(k->right);
+            right_rotate(inserted_node->parent);
             left_rotate(k);
         }        
 
@@ -144,7 +144,10 @@ Node * insert(Node *root, int key,void * value){
     }
     node->parent = k;
     while(k != NULL){
-        rotate(k,node);
+        Node *  x = rotate(k,node);
+        if(k ==  root){
+             root = x;
+        }
         node_height(k);
         k = k->parent;
     }
@@ -168,7 +171,7 @@ void print1(Node * root){
         for(i = 0;i < level_num; i++){
             if(node_queue[i] != empty_node) 
                 printf("%3d", node_queue[i]->key);
-            else printf("   ");
+            else printf("---");
             for(int j = 0 ;j < distance; j++)
                 printf("   ");
         }
@@ -190,9 +193,8 @@ void print1(Node * root){
 int main(int argc, char *argv[]){
     Node * root = insert(NULL,10,NULL);
     insert(root,20,NULL);
-    insert(root,1,NULL);
-    insert(root,2,NULL);
-    insert(root,3,NULL);
+    insert(root,30,NULL);
+    insert(root,40,NULL);
     print1(root);
 }
 
