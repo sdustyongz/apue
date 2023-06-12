@@ -17,6 +17,11 @@ struct node {
 
 typedef struct node  Node;
 
+struct  Tree{
+    Node * root;
+};
+typedef  struct Tree Tree;
+
 
 Node * create_node(int key ,void * value){
     Node * node = malloc(sizeof(Node));
@@ -60,9 +65,10 @@ int height_diff(Node * node){
     return left_height - (node->right == NULL ? 0:node->right->height);
 }
 
-Node * right_rotate(Node * node){
+Node * right_rotate(Node * node,  Tree * tree){
     Node * lk = node->left;
     lk->parent = node->parent;
+    if(node == tree->root) tree->root = lk;
     if(node->parent->right == node)
             node->parent->right= lk;
     else  node->parent->left =lk;
@@ -77,12 +83,16 @@ Node * right_rotate(Node * node){
     return node->parent;
 }
 
-Node * left_rotate(Node * node){
+Node * left_rotate(Node * node, Tree * tree){
     Node * rk  = node->right;
     rk->parent = node->parent;
-    if(node->parent  && (node->parent->right == node))
-            node->parent->right= rk;
-    else if(node->parent) node->parent->left =rk;
+    if(node  == tree->root) {
+        tree->root = rk;
+    }else{
+        if (node->parent->right == node)
+                node->parent->right= rk;
+         else node->parent->left =rk;
+    }
     node->right = rk->left;
     if(node->right != NULL)
         node->right->parent = node;
@@ -94,20 +104,20 @@ Node * left_rotate(Node * node){
     return node->parent;
 }
 
-void rotate(Node * k, Node * inserted_node){
+void rotate(Node * k, Node * inserted_node, Tree * tree){
      if(height_diff(k) > 1){
         if(inserted_node->parent->left == inserted_node){
-            right_rotate(k);
+            right_rotate(k, tree);
         }else{
-            left_rotate(k->left);
-            right_rotate(k);
+            left_rotate(k->left,tree);
+            right_rotate(k, tree);
         }
      }else if(height_diff(k) < -1){
         if(inserted_node->parent->right == inserted_node){
-            left_rotate(k);
+            left_rotate(k, tree);
         }else{
-            right_rotate(inserted_node->parent);
-            left_rotate(k);
+            right_rotate(inserted_node->parent,tree);
+            left_rotate(k, tree);
         }        
 
      }     
@@ -116,13 +126,13 @@ void rotate(Node * k, Node * inserted_node){
 
 
 
-Node * insert(Node *root, int key,void * value){
-    if(root == NULL){
-       root = create_node(key,value);
-       return root; 
+Node * insert(Tree *tree, int key,void * value){
+    if(tree == NULL || tree->root == NULL){
+       tree->root = create_node(key,value);
+       return tree->root; 
     }
     int height = 1;
-    Node * k  =root;
+    Node * k  =tree->root;
     while(k  != NULL){
         if(k->key == key)
             return k;
@@ -144,16 +154,14 @@ Node * insert(Node *root, int key,void * value){
     }
     node->parent = k;
     while(k != NULL){
-        Node *  x = rotate(k,node);
-        if(k ==  root){
-             root = x;
-        }
+        rotate(k,node,tree);
         node_height(k);
         k = k->parent;
     }
     return node;
 }   
-void print1(Node * root){
+void print1(Tree * tree){
+    Node * root = tree->root;
     Node * empty_node = malloc(sizeof(Node));
     memset(empty_node,0,sizeof(Node));
     Node * p  =root;
@@ -191,10 +199,15 @@ void print1(Node * root){
 }
 
 int main(int argc, char *argv[]){
-    Node * root = insert(NULL,10,NULL);
-    insert(root,20,NULL);
-    insert(root,30,NULL);
-    insert(root,40,NULL);
-    print1(root);
+    Tree * tree  = malloc(sizeof(struct Tree));
+    Node * root = insert(tree,10,NULL);
+    insert(tree,20,NULL);
+    insert(tree,30,NULL);
+    insert(tree,40,NULL);
+    insert(tree,9,NULL);
+    insert(tree,8,NULL);
+    insert(tree,7,NULL);
+    insert(tree,6,NULL);
+    print1(tree);
 }
 
