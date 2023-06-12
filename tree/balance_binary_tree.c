@@ -217,14 +217,17 @@ Node * search(Tree * tree, int key){
  * 节点前驱
 */
 Node * forerunner(Node * node){
-    Node * k;
-    if((k = node->left)!=null){
+    Node * k = node;
+    if((k = node->left)!=NULL){
         while(k->right){
             k=k->right;
         }
         return k;
     }
-    
+   while(k->parent != NULL && k == k->parent->left) 
+        k = k->parent;
+    if(k != node) return k;
+    return  NULL;
 }
 
 /**
@@ -237,20 +240,41 @@ Node * successor(){
 void delete(Tree * tree,int key){
     Node * node = search(tree,key);
     if(node == NULL) return;
+    Node * k = node;
     /**
      * this is ROOT
      * root 节点需要重新变更
     */
-    if(node->parent  == NULL);
     if(node->left == NULL || node->right == NULL){
-        Node * k = node->left == NULL？node->right:node->left;
-    }else{
-        if(node->left - node->right >0){
-            //    
-        }else{
-
+        k = (node->left == NULL) ?node->right:node->left;
+        if( node->parent ==NULL) tree->root = k;
+        if(node->parent->left == node) node->parent->left = k;
+        else if(node->parent->right== node) node->parent->right= k;
+        if(k != NULL){
+            k->parent = node->parent;
+            while(k->parent != NULL){
+                node_height(k->parent);
+                k = k->parent;
+            }
         }
-    }    
+        free(node);
+        return;
+     }
+     if(node->left->height - node->right->height >0){
+            k = node->left;
+            while(k->right != NULL) k = k ->right;
+            k->parent->right = NULL;
+        }else{
+            k = node->right;
+            while(k->left != NULL) k = k->left;
+            k->parent->left = NULL;
+     }
+     Node * p = k;
+     while(k->parent != NULL){
+         node_height(k->parent);
+        k = k->parent;
+     }
+     free(p);
 }
 
 int main(int argc, char *argv[]){
@@ -263,6 +287,9 @@ int main(int argc, char *argv[]){
     insert(tree,8,NULL);
     insert(tree,7,NULL);
     insert(tree,6,NULL);
+    print1(tree);
+    delete(tree,10);
+    printf("--after delte 10\n");
     print1(tree);
 }
 
