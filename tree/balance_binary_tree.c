@@ -106,17 +106,17 @@ Node * left_rotate(Node * node, Tree * tree){
 
 void rotate(Node * k, Node * inserted_node, Tree * tree){
      if(height_diff(k) > 1){
-        if(inserted_node->parent->left == inserted_node){
+        if(k->left->height - (k->right == NULL?0: k->right->height) > 0){
             right_rotate(k, tree);
         }else{
             left_rotate(k->left,tree);
             right_rotate(k, tree);
         }
      }else if(height_diff(k) < -1){
-        if(inserted_node->parent->right == inserted_node){
+        if(k->right->height - (k->left == NULL?0: k->left->height) > 0){
             left_rotate(k, tree);
         }else{
-            right_rotate(inserted_node->parent,tree);
+            right_rotate(k->right,tree);
             left_rotate(k, tree);
         }        
 
@@ -196,6 +196,29 @@ void print1(Tree * tree){
         printf("\n");
     }   
     free(empty_node);
+}
+
+Node * search(Tree * tree, int key){
+    if(tree == NULL) return NULL;
+    if(tree->root == NULL) return NULL;
+    Node *k = tree->root;
+    while(k){
+        if(k->key == key)
+            return k;
+        if(k->key < key)
+            k = k->right;
+        else  k = k->left;
+    }
+
+    return NULL;
+}
+
+void delete(Tree * tree,int key){
+    Node * node = search(tree,key);
+    if(node == NULL) return;
+    if(node->left == NULL || node->right == NULL){
+         
+    }    
 }
 
 int main(int argc, char *argv[]){
