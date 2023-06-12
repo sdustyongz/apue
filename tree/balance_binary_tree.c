@@ -104,7 +104,7 @@ Node * left_rotate(Node * node, Tree * tree){
     return node->parent;
 }
 
-void rotate(Node * k, Node * inserted_node, Tree * tree){
+void rotate(Node * k , Tree * tree){
      if(height_diff(k) > 1){
         if(k->left->height - (k->right == NULL?0: k->right->height) > 0){
             right_rotate(k, tree);
@@ -154,7 +154,7 @@ Node * insert(Tree *tree, int key,void * value){
     }
     node->parent = k;
     while(k != NULL){
-        rotate(k,node,tree);
+        rotate(k,tree);
         node_height(k);
         k = k->parent;
     }
@@ -213,11 +213,43 @@ Node * search(Tree * tree, int key){
     return NULL;
 }
 
+/**
+ * 节点前驱
+*/
+Node * forerunner(Node * node){
+    Node * k;
+    if((k = node->left)!=null){
+        while(k->right){
+            k=k->right;
+        }
+        return k;
+    }
+    
+}
+
+/**
+ * 节点后继
+*/
+Node * successor(){
+
+}
+
 void delete(Tree * tree,int key){
     Node * node = search(tree,key);
     if(node == NULL) return;
+    /**
+     * this is ROOT
+     * root 节点需要重新变更
+    */
+    if(node->parent  == NULL);
     if(node->left == NULL || node->right == NULL){
-         
+        Node * k = node->left == NULL？node->right:node->left;
+    }else{
+        if(node->left - node->right >0){
+            //    
+        }else{
+
+        }
     }    
 }
 
