@@ -20,7 +20,7 @@ struct Tree
     int size;
 };
 typedef struct Tree Tree;
-void insert_balance(Node *node, Tree * tree);
+void insert_balance(Node *node, Tree *tree);
 int tree_height(Node *root)
 {
     if (root == NULL)
@@ -37,7 +37,7 @@ int tree_height(Node *root)
 }
 Tree *createTree()
 {
-    Tree * tree = malloc(sizeof(Tree));
+    Tree *tree = malloc(sizeof(Tree));
     memset(tree, 0, sizeof(Tree));
     return tree;
 }
@@ -52,7 +52,7 @@ Node *createNode(int key, void *value)
     return node;
 }
 
-Node *insert(Tree* tree, int key, void *value)
+Node *insert(Tree *tree, int key, void *value)
 {
     Node *node = createNode(key, value);
     if (tree->root == NULL)
@@ -88,22 +88,23 @@ Node *insert(Tree* tree, int key, void *value)
 }
 Node *right_rotate(Node *node, Tree *tree)
 {
-    Node *lk = node->left;
-    if(lk != NULL)
-         lk->parent = node->parent;
-    if (node == tree->root)
-        tree->root = lk;
-    if (node->parent->right == node)
-        node->parent->right = lk;
-    else
-        node->parent->left = lk;
-    node->parent->left = node->left;
-    node->left = lk->right;
-    if (node->left != NULL)
-        node->left->parent = node;
-    node->parent = lk;
-    lk->right = node;
-    return node->parent;
+
+    Node * parent  = node->parent;
+    Node * left = node->left;
+    node->left = left->right;
+    left->right = node;
+    left->parent = parent;
+    node->parent = left;
+    if(parent == NULL){
+        tree->root = left;
+    }else{
+        if(parent->right == node){
+            parent->right = left;
+        }else{
+            parent->left = left;
+        }
+    }
+    return left;
 }
 
 Node *left_rotate(Node *node, Tree *tree)
@@ -130,34 +131,59 @@ Node *left_rotate(Node *node, Tree *tree)
     return node->parent;
 }
 
-void insert_balance(Node *node, Tree * tree){
-    Node * parent  = node->parent;
-    if(parent == NULL){
-         node->red = 0;
+void insert_balance(Node *node, Tree *tree)
+{
+    Node *parent = node->parent;
+    if (parent == NULL)
+    {
+        node->red = 0;
         return;
     }
-    if(parent->red == 0) return;
-    //parent->parent 一定存在，因为root为黑色
-    Node * uncle;
-    if(parent->parent->left == parent)
+    if (parent->red == 0)
+        return;
+    // parent->parent 一定存在，因为root为黑色
+    Node *grandfather = parent->parent;
+    Node *uncle;
+    if (grandfather->left == parent)
         uncle = parent->parent->right;
-    else uncle = parent->parent->left;
-    if(uncle != NULL && uncle->red == 1){
+    else
+        uncle = grandfather->left;
+    if (uncle != NULL && uncle->red == 1)
+    {
         parent->red = 0;
         parent->parent->red = 1;
         uncle->red = 0;
-        insert_balance(parent->parent,tree);
-    }else{
-        //叔父节点为黑
-        if(node == parent->left){
-            parent->red = 0;
-            parent->parent->red = 1;
-            right_rotate(parent->parent, tree);
+        insert_balance(grandfather, tree);
+    }
+    else
+    {
+        // 叔父节点为黑
+        if (parent == grandfather->left)
+        {
+            if (node == parent->left)
+            {
+                parent->red = 0;
+                grandfather->red = 1;
+                right_rotate(parent->parent, tree);
+            }
+            else
+            {
+                left_rotate(parent, tree);
+                node->red = 0;
+                node->parent->red = 1;
+                right_rotate(node->parent, tree);
+            }
         }else{
-            left_rotate(parent,tree);
-            node->red = 0;
-            node->parent->red = 1;
-            right_rotate(node->parent, tree);
+            if(node == parent->right){
+                parent->red = 0;
+                grandfather->red = 1;
+                left_rotate(grandfather,tree);
+            }else{
+                right_rotate(parent,tree);
+                node->red = 0 ;
+                node->parent->red = 1;
+                left_rotate(node->parent,tree);
+            }
         }
     }
 }
@@ -182,7 +208,7 @@ void print1(Tree *tree)
         for (i = 0; i < level_num; i++)
         {
             if (node_queue[i] != empty_node)
-                printf("%d-%d" , node_queue[i]->key,node_queue[i]->red);
+                printf("%d-%d", node_queue[i]->key, node_queue[i]->red);
             else
                 printf("---");
             for (int j = 0; j < distance; j++)
@@ -203,12 +229,14 @@ void print1(Tree *tree)
     }
     free(empty_node);
 }
-int main(int argc, char *argv[]){
-    Tree * tree = createTree();
-    insert(tree,1,NULL);
-    insert(tree,10,NULL);
-    insert(tree,20,NULL);
-    insert(tree,30 ,NULL);
-    insert(tree,40,NULL);
-   print1(tree); 
+int main(int argc, char *argv[])
+{
+    Tree *tree = createTree();
+    insert(tree, 10, NULL);
+    insert(tree,5,NULL);
+    insert(tree,7,NULL);
+    insert(tree, 30, NULL);
+   insert(tree, 20, NULL);
+  insert(tree, 40, NULL);
+    print1(tree);
 }
