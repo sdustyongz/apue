@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define RED 1
+#define BLACK 0
+
 struct Node
 {
     int key;
@@ -10,7 +13,7 @@ struct Node
     struct Node *left;
     struct Node *right;
     struct Node *parent;
-    short red;
+    short color;
 };
 typedef struct Node Node;
 
@@ -48,7 +51,7 @@ Node *createNode(int key, void *value)
     memset(node, 0, sizeof(Node));
     node->key = key;
     node->value = value;
-    node->red = 1;
+    node->color = RED;
     return node;
 }
 
@@ -57,7 +60,7 @@ Node *insert(Tree *tree, int key, void *value)
     Node *node = createNode(key, value);
     if (tree->root == NULL)
     {
-        node->red = 0;
+        node->color = BLACK;
         tree->root = node;
         return node;
     }
@@ -89,18 +92,24 @@ Node *insert(Tree *tree, int key, void *value)
 Node *right_rotate(Node *node, Tree *tree)
 {
 
-    Node * parent  = node->parent;
-    Node * left = node->left;
+    Node *parent = node->parent;
+    Node *left = node->left;
     node->left = left->right;
     left->right = node;
     left->parent = parent;
     node->parent = left;
-    if(parent == NULL){
+    if (parent == NULL)
+    {
         tree->root = left;
-    }else{
-        if(parent->right == node){
+    }
+    else
+    {
+        if (parent->right == node)
+        {
             parent->right = left;
-        }else{
+        }
+        else
+        {
             parent->left = left;
         }
     }
@@ -109,6 +118,17 @@ Node *right_rotate(Node *node, Tree *tree)
 
 Node *left_rotate(Node *node, Tree *tree)
 {
+    Node *parent = node->parent;
+    Node *right = node->right;
+    node->right = right->left;
+    right->left = node;
+    right->parent = parent;
+    node->parent = right;
+    if (parent == NULL)
+    {
+        tree->root = right;
+    }
+
     Node *rk = node->right;
     rk->parent = node->parent;
     if (node == tree->root)
@@ -131,15 +151,32 @@ Node *left_rotate(Node *node, Tree *tree)
     return node->parent;
 }
 
+Node *search(Tree *tree, int key)
+{
+    if (tree == NULL)
+        return NULL;
+    Node *k = tree->root;
+    while (k != NULL)
+    {
+        if (k->key == key)
+            return k;
+        if (k->key > key)
+            k = k->left;
+        else
+            k = k->right;
+    }
+    return NULL;
+}
+
 void insert_balance(Node *node, Tree *tree)
 {
     Node *parent = node->parent;
     if (parent == NULL)
     {
-        node->red = 0;
+        node->color = BLACK;
         return;
     }
-    if (parent->red == 0)
+    if (parent->color == BLACK)
         return;
     // parent->parent 一定存在，因为root为黑色
     Node *grandfather = parent->parent;
@@ -148,11 +185,11 @@ void insert_balance(Node *node, Tree *tree)
         uncle = parent->parent->right;
     else
         uncle = grandfather->left;
-    if (uncle != NULL && uncle->red == 1)
+    if (uncle != NULL && uncle->color == RED)
     {
-        parent->red = 0;
-        parent->parent->red = 1;
-        uncle->red = 0;
+        parent->color = BLACK;
+        parent->parent->color = RED;
+        uncle->color = BLACK;
         insert_balance(grandfather, tree);
     }
     else
@@ -162,27 +199,32 @@ void insert_balance(Node *node, Tree *tree)
         {
             if (node == parent->left)
             {
-                parent->red = 0;
-                grandfather->red = 1;
+                parent->color = BLACK;
+                grandfather->color = RED;
                 right_rotate(parent->parent, tree);
             }
             else
             {
                 left_rotate(parent, tree);
-                node->red = 0;
-                node->parent->red = 1;
+                node->color = BLACK;
+                node->parent->color = RED;
                 right_rotate(node->parent, tree);
             }
-        }else{
-            if(node == parent->right){
-                parent->red = 0;
-                grandfather->red = 1;
-                left_rotate(grandfather,tree);
-            }else{
-                right_rotate(parent,tree);
-                node->red = 0 ;
-                node->parent->red = 1;
-                left_rotate(node->parent,tree);
+        }
+        else
+        {
+            if (node == parent->right)
+            {
+                parent->color = BLACK;
+                grandfather->color = RED;
+                left_rotate(grandfather, tree);
+            }
+            else
+            {
+                right_rotate(parent, tree);
+                node->color = BLACK;
+                node->parent->color = RED;
+                left_rotate(node->parent, tree);
             }
         }
     }
@@ -208,7 +250,7 @@ void print1(Tree *tree)
         for (i = 0; i < level_num; i++)
         {
             if (node_queue[i] != empty_node)
-                printf("%d-%d", node_queue[i]->key, node_queue[i]->red);
+                printf("%d-%d", node_queue[i]->key, node_queue[i]->color);
             else
                 printf("---");
             for (int j = 0; j < distance; j++)
@@ -229,14 +271,156 @@ void print1(Tree *tree)
     }
     free(empty_node);
 }
+
+/**
+ * 后继
+ */
+Node *sucessor(Tree *tree, Node *node)
+{
+    Node *k;
+    if ((k = node->right) != NULL)
+    {
+        while (k->left != NULL)
+        {
+            k = k->left;
+        }
+        return k;
+    }
+    k = node;
+    while (k)
+    {
+        if (k->parent && k == k->parent->left)
+            return k->parent;
+        else
+            k = k->parent;
+    }
+    return NULL;
+}
+
+Node *delete(Tree *tree, int key)
+{
+    Node *node = search(tree, key);
+    if (node == NULL)
+        return NULL;
+    Node *x, *y;
+    if (node->left == NULL || node->right == NULL)
+        y = node;
+    else
+        y = sucessor(tree, node);
+    if (y->left == NULL)
+        x = y->right;
+    else
+        x = y->left;
+    if (y == tree->root)
+    {
+        tree->root = x;
+        x->parent = NULL;
+        x->color = 0;
+        return y;
+    }
+    else
+    {
+        x->parent = y->parent;
+        if (y == y->parent->left)
+            y->parent->left = x;
+        else
+            y->parent->right = x;
+    }
+    if (y != node)
+    {
+        node->key = y->key;
+        node->value = y->value;
+    }
+    if (y->color == BLACK)
+    {
+    }
+}
+
+int color(Node *node)
+{
+    if (node == NULL)
+        return 0;
+    return node->color;
+}
+
+void rb_delete_fixup(Tree *tree, Node *node)
+{
+    Node *parent ,*brother;
+    while (node != tree->root && color(node) == 0)
+    {
+        parent = node->parent;
+        if (node == parent->left)
+        {
+            brother = parent->right;
+            if (color(brother) == 1)
+            {
+                brother->color = BLACK;
+                left_rotate(parent, tree);
+                parent->color = RED;
+                brother = brother->left;
+            }
+            if (color(brother) == 0 && color(brother->left) == 0 && color(brother->right) == 0)
+            {
+                brother->color = RED;
+                node = parent;
+            }
+            else
+            {
+                if (color(brother) == BLACK && color(brother->right) == BLACK)
+                {
+                    brother->left->color = BLACK;
+                    brother->color = RED;
+                    right_rotate(brother, tree);
+                    brother = brother->parent;
+                }
+                brother->color = brother->parent->color;
+                brother->parent->color = BLACK;
+                if(brother->right)
+                    brother->right->color = BLACK;
+
+                left_rotate( brother->parent,tree);
+                node = brother;
+            }
+        }
+        else
+        {
+            brother = parent->left;
+            if(color(brother) == 1){
+                brother->color = 0;
+                right_rotate(parent, tree);
+                brother = brother->right; 
+            }
+            if(color(brother->left) == BLACK && color(brother->right) == BLACK){
+                brother->color = RED;
+                node = parent;
+            }else{
+                if(color(brother->left) == BLACK){
+                    brother->color = RED;
+                    if(brother->left)
+                         brother->left->color = BLACK;
+                    left_rotate(brother,tree);
+                    brother = brother->parent;
+                }
+
+                brother->color = brother->parent->color;
+                brother->parent->color = BLACK;
+                brother->left->color = BLACK;
+                right_rotate(brother->parent, tree);
+                node = brother;
+            }
+        }
+    }
+    node->color = BLACK;
+}
+
 int main(int argc, char *argv[])
 {
     Tree *tree = createTree();
     insert(tree, 10, NULL);
-    insert(tree,5,NULL);
-    insert(tree,7,NULL);
+    insert(tree, 5, NULL);
+    insert(tree, 7, NULL);
     insert(tree, 30, NULL);
-   insert(tree, 20, NULL);
-  insert(tree, 40, NULL);
+    insert(tree, 20, NULL);
+    insert(tree, 40, NULL);
     print1(tree);
 }
