@@ -23,7 +23,10 @@ struct Tree
     int size;
 };
 typedef struct Tree Tree;
+
 void insert_balance(Node *node, Tree *tree);
+void rb_delete_fixup(Tree *tree, Node *node);
+
 int tree_height(Node *root)
 {
     if (root == NULL)
@@ -127,28 +130,14 @@ Node *left_rotate(Node *node, Tree *tree)
     if (parent == NULL)
     {
         tree->root = right;
+    }else {
+        if(parent->left == node){
+            parent->left = right;
+        }else{
+            parent->right = right;
+        }
     }
-
-    Node *rk = node->right;
-    rk->parent = node->parent;
-    if (node == tree->root)
-    {
-        tree->root = rk;
-    }
-    else
-    {
-        if (node->parent->right == node)
-            node->parent->right = rk;
-        else
-            node->parent->left = rk;
-    }
-    node->right = rk->left;
-    if (node->right != NULL)
-        node->right->parent = node;
-
-    node->parent = rk;
-    rk->left = node;
-    return node->parent;
+   return right; 
 }
 
 Node *search(Tree *tree, int key)
@@ -320,11 +309,8 @@ Node *delete(Tree *tree, int key)
     }
     else
     {
-        x->parent = y->parent;
-        if (y == y->parent->left)
-            y->parent->left = x;
-        else
-            y->parent->right = x;
+        if(x)
+            x->parent = y->parent;
     }
     if (y != node)
     {
@@ -333,6 +319,19 @@ Node *delete(Tree *tree, int key)
     }
     if (y->color == BLACK)
     {
+        if(x){
+            if (y == y->parent->left)
+                y->parent->left = x;
+            else
+                y->parent->right = x;
+         rb_delete_fixup(tree,x);
+        }
+        else{
+            rb_delete_fixup(tree,y);
+            if(y->parent->left == y)
+                y->parent->left = y->left == NULL? y->right:y->left; 
+            else  y->parent->right = y->left == NULL? y->right:y->left; 
+        }
     }
 }
 
@@ -346,7 +345,7 @@ int color(Node *node)
 void rb_delete_fixup(Tree *tree, Node *node)
 {
     Node *parent ,*brother;
-    while (node != tree->root && color(node) == 0)
+    while (node != tree->root && color(node) == BLACK)
     {
         parent = node->parent;
         if (node == parent->left)
@@ -379,7 +378,7 @@ void rb_delete_fixup(Tree *tree, Node *node)
                     brother->right->color = BLACK;
 
                 left_rotate( brother->parent,tree);
-                node = brother;
+                node = tree->root;
             }
         }
         else
@@ -406,7 +405,7 @@ void rb_delete_fixup(Tree *tree, Node *node)
                 brother->parent->color = BLACK;
                 brother->left->color = BLACK;
                 right_rotate(brother->parent, tree);
-                node = brother;
+                node = tree->root;
             }
         }
     }
@@ -422,5 +421,8 @@ int main(int argc, char *argv[])
     insert(tree, 30, NULL);
     insert(tree, 20, NULL);
     insert(tree, 40, NULL);
+    print1(tree);
+
+    delete(tree,7);
     print1(tree);
 }
