@@ -14,13 +14,13 @@ void  bag_select(int weight[],int value[],int size,int bag_capacity){
 
     for(i = 1;i < size;i++){
         for(j = 1;j < bag_capacity;j++){
-            index = j - weight[j-1];
+            index = j - weight[i-1];
             index = index >= 0 ? index:0;
-            if(dp_arr[i-1][j] > (dp_arr[i-1][index] + value[j-1])){
+            if(dp_arr[i-1][j] > (dp_arr[i-1][index] + value[i-1])){
                 dp_arr[i][j] = dp_arr[i-1][j];
             }else{
-                if(weight[j-1] < j)
-                    dp_arr[i][j] =  dp_arr[i-1][index] + value[j-1];
+                if(weight[i-1] < j)
+                    dp_arr[i][j] =  dp_arr[i-1][index] + value[i-1];
                 else dp_arr[i][j] = 0;
             }
         }
