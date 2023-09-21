@@ -19,6 +19,7 @@ BTNode * createThree(){
     }
     return root;
 }
+void insert_notfull_node(BTNode * x, int key);
 
 
 
@@ -81,12 +82,14 @@ void insert_notfull_node(BTNode * x, int key){
     if(x->isLeaf !=0 ){
         while(i >=0 && key < x->value[i]){
             x->value[i+1] = x->value[i];
+            i --;
         }
         x->value[i+1] = key;
         x->num++;
 
     }else{
-        while(i >= 0 && key < x->value[i]);
+        while(i >= 0 && key < x->value[i])
+            i--;
         BTNode * y = x->ptr[i+1];
         if(y->num == KEY_NUM){
             split_node(x,i+1);
@@ -131,6 +134,6 @@ int main(int argc,char *argv[]){
    insert_node(3);
    insert_node(2);
    insert_node(4);
-//    print();
+    print();
 return 1;
 }
