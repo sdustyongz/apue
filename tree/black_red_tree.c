@@ -325,12 +325,14 @@ Node *delete(Tree *tree, int key)
             else
                 y->parent->right = x;
          rb_delete_fixup(tree,x);
+         free(y);
         }
         else{
             rb_delete_fixup(tree,y);
             if(y->parent->left == y)
                 y->parent->left = y->left == NULL? y->right:y->left; 
             else  y->parent->right = y->left == NULL? y->right:y->left; 
+            free(y);
         }
     }
 }
@@ -351,12 +353,12 @@ void rb_delete_fixup(Tree *tree, Node *node)
         if (node == parent->left)
         {
             brother = parent->right;
-            if (color(brother) == 1)
+            if (color(brother) == RED)
             {
                 brother->color = BLACK;
                 left_rotate(parent, tree);
                 parent->color = RED;
-                brother = brother->left;
+                brother = parent->right;
             }
             if (color(brother) == 0 && color(brother->left) == 0 && color(brother->right) == 0)
             {
