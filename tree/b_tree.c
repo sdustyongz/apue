@@ -56,7 +56,7 @@ void split_node(BTNode * parent ,int index){
     int key = child->value[t-1]; 
     while(i >= 0 && key <parent->value[i]){
         parent->value[i+1] = parent->value[i];
-        parent->ptr[i+2] = parent->value[i+1];
+        parent->ptr[i+2] = parent->ptr[i+1];
         i--;
     }
     parent->value[i+1] = key;
@@ -93,6 +93,7 @@ void insert_notfull_node(BTNode * x, int key){
         BTNode * y = x->ptr[i+1];
         if(y->num == KEY_NUM){
             split_node(x,i+1);
+            y  = x;
         }
         insert_notfull_node(y,key);
     }
@@ -110,9 +111,9 @@ void print(){
        while(i-- > 0){ 
          BTNode * bnode = (BTNode *)offer(que);
          for(j = 0;j < bnode->num; j++){
-            printf("%d ",bnode->value[i]);
-            if(bnode->ptr[i] != NULL){
-                add(temp,bnode->ptr[i]);
+            printf("%d ",bnode->value[j]);
+            if(bnode->ptr[j] != NULL){
+                add(temp,(void*)bnode->ptr[j]);
             }
          }
          add(temp,bnode->ptr[j]);
@@ -134,6 +135,17 @@ int main(int argc,char *argv[]){
    insert_node(3);
    insert_node(2);
    insert_node(4);
+   insert_node(20);
+   insert_node(7);
+   insert_node(30);
+   insert_node(8);
+   insert_node(9);
+   insert_node(50);
+   insert_node(40);
+   insert_node(60);
+   print();
+   printf("\n");
+   insert_node(70);
     print();
 return 1;
 }
