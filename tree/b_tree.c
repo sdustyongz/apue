@@ -171,7 +171,7 @@ void print()
 /**
  * 将parent的左右两个节点合并，并将value[leftIndex]的值也合并到新的节点
 */
-BTNode merge_brother_node(BTNode *parent, int leftIndex, int rightIndex)
+BTNode * merge_brother_node(BTNode *parent, int leftIndex, int rightIndex)
 {
     BTNode *lChild = parent->ptr[leftIndex];
     BTNode *rChild = parent->ptr[rightIndex];
@@ -199,6 +199,7 @@ BTNode merge_brother_node(BTNode *parent, int leftIndex, int rightIndex)
     lChild->ptr[j+1] = rChild->ptr[lChild->num];
     lChild->num++;
     free(rChild);
+    return lChild;
 }
 /**
  * prIndex位置从x借一位，brotherIndex 的一位移到parent
@@ -211,13 +212,13 @@ void borrow_brother_one(BTNode * parent ,int prIndex ,int brotherIndex){
         BTNode * pr;
         if(brotherIndex > prIndex){
                pr = brother->ptr[0]; 
-               value = brother->num[0];
+               value = brother->value[0];
                 while(i < brother->num - 1){
                        brother->value[i] = brother->value[i+1]; 
-                       brother->pr[i] = brother->pr[i+1];
+                       brother->ptr[i] = brother->ptr[i+1];
                        i++;
                 }
-                brother->pr[i] = brother->pr[i+1];
+                brother->ptr[i] = brother->ptr[i+1];
                 brother->num --;
 
                 node->value[node->num] = parent->value[prIndex];
@@ -227,7 +228,7 @@ void borrow_brother_one(BTNode * parent ,int prIndex ,int brotherIndex){
                 parent->value[prIndex] = value;
         }else if(brotherIndex < prIndex){
             pr = brother->ptr[brother->num];
-            value = brother->value[brother-num -1];
+            value = brother->value[brother->num -1];
             i = node->num;
             while(i > 0){
                 node->ptr[i+1] = node->ptr[i];
@@ -249,7 +250,7 @@ void borrow_brother_one(BTNode * parent ,int prIndex ,int brotherIndex){
  * 
 */
 Np * previous(BTNode * node,int valueIndex){
-    Np * np = malloc(sizeof(NP));
+    Np * np = malloc(sizeof(Np));
    if(node->isLeaf){
         np->pr = node ;
         if(valueIndex >= 1)
@@ -258,8 +259,8 @@ Np * previous(BTNode * node,int valueIndex){
         return np;
    } 
    node = node->ptr[valueIndex];
-   while(node->[node->num] != NULL){
-     node = node->[node->num];
+   while(node->ptr[node->num] != NULL){
+     node = node->ptr[node->num];
    }
    np->pr = node ;
    np->index = node->num -1;
@@ -267,15 +268,15 @@ Np * previous(BTNode * node,int valueIndex){
 }
 
 Np * next(BTNode * node,int valueIndex){
-    Np * np = malloc(sizeof(NP));
+    Np * np = malloc(sizeof(Np));
     if(node->isLeaf){
         np->pr = node;
-        node->index = 0;
+        np->index = 0;
         return np;
     }
     node = node->ptr[valueIndex+1];
-    whlie(!node->isleaf){
-        node->node->ptr[0];
+    while(node->isLeaf == 0){
+        node = node->ptr[0];
     }
     np->pr = node;
     np->index = 0;
@@ -305,7 +306,9 @@ void delete_check_child(BTNode *node, int prIndex)
 
 void delete_on_node(BTNode * pr, int key)
 {
+        int  t = KEY_NUM/2+1;
     int i = pr->num - 1;
+    int value;
     while (i >= 0 && pr->value[i] > key)
     {
         i--;
@@ -317,18 +320,48 @@ void delete_on_node(BTNode * pr, int key)
        }else{
             if(pr->ptr[1]->num >= t){
                borrow_brother_one(pr,0,1); 
+               delete_on_node(pr->ptr[0], key);
             }else {
                 merge_brother_node(pr,0,1);
+                delete_on_node(pr->ptr[0],key);
             }
        } 
     }else if(pr->value[i] == key){
        if(pr->isLeaf){
-
+           while(i < pr->num -1){
+                   pr->value[i] = pr->value[i+1];
+                   pr->ptr[i+1] = pr->ptr[i+2];
+           } 
+           pr->num--;
+           return;
        }else{
-
+               if(pr->ptr[i]->num >= t){
+                       Np * np = previous(pr,i);
+                        np->index;
+                       value  = np->pr->value[np->index];
+                       np->pr->value[np->pr->num -1] = -1;
+                       np->pr->num --;
+                       pr->value[i] = value;
+                       free(np);
+                       return;
+               }else if(pr->ptr[i+1] >= t){
+                        Np * np = next(pr,i);
+                        value = np->pr->value[0];
+                        i = 0;
+                        while(i < np->pr->num){
+                                np->pr->value[i] = np->pr->value[i+1];
+                        }
+                        np->pr->num--;
+                        pr->value[i] = value;
+                        free(np);
+                        return;
+               }else{
+                       merge_brother_node(pr,i,i+1);
+                       delete_on_node(pr->ptr[i],key);
+               }
        }
     }else {
-
+                
     }
     
 }
