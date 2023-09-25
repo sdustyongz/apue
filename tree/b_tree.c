@@ -168,13 +168,16 @@ void print()
     free(temp);
 }
 
+/**
+ * 将parent的左右两个节点合并，并将value[leftIndex]的值也合并到新的节点
+*/
 BTNode merge_brother_node(BTNode *parent, int leftIndex, int rightIndex)
 {
     BTNode *lChild = parent->ptr[leftIndex];
     BTNode *rChild = parent->ptr[rightIndex];
     int i = leftIndex, j = lChild->num;
     int value = parent->value[leftIndex];
-    // int ptr  = parent->ptr[leftIndex];
+    BTNode * ptr  = parent->ptr[leftIndex+1];
     while (i < parent->num - 1)
     {
         parent->value[i] = parent->value[i + 1];
@@ -182,19 +185,24 @@ BTNode merge_brother_node(BTNode *parent, int leftIndex, int rightIndex)
     }
     parent->num--;
     i = 0;
-    lChild->value[j++] = value;
+    lChild->value[j] = value;
+    lChild->ptr[j+1] = ptr;
+    j++;
     while (i < rChild->num)
     {
         lChild->value[j] = rChild->value[i];
-        lChild->ptr[j] = rChild->ptr[i];
+        lChild->ptr[j+1] = rChild->ptr[i];
         i++;
         j++;
-        rChild->num++;
+        lChild->num++;
     }
-    lChild->ptr[j] = rChild->ptr[lChild->num];
-    rChild->num++;
+    lChild->ptr[j+1] = rChild->ptr[lChild->num];
+    lChild->num++;
+    free(rChild);
 }
-
+/**
+ * prIndex位置从x借一位，brotherIndex 的一位移到parent
+*/
 void borrow_brother_one(BTNode * parent ,int prIndex ,int brotherIndex){
         int i = 0;
         BTNode  * brother  = parent->ptr[brotherIndex];
@@ -212,16 +220,66 @@ void borrow_brother_one(BTNode * parent ,int prIndex ,int brotherIndex){
                 brother->pr[i] = brother->pr[i+1];
                 brother->num --;
 
-                node->value[node->num] = parent->value[parent->num -1];
-                node->ptr[node->num+1] = parent->ptr[parent->num];
+                node->value[node->num] = parent->value[prIndex];
                 node->num++;
+                node->ptr[node->num+1] = pr;
 
-                parent->value[parent->num -1] = value;
-                parent->ptr[parent->num] = pr;
+                parent->value[prIndex] = value;
         }else if(brotherIndex < prIndex){
+            pr = brother->ptr[brother->num];
+            value = brother->value[brother-num -1];
+            i = node->num;
+            while(i > 0){
+                node->ptr[i+1] = node->ptr[i];
+                node->value[i] = node->value[i-1];
+                i--;
+            }
+            node->ptr[1] = node->ptr[0];
+            node->value[0] = parent->value[brotherIndex];
+            node->ptr[0] = brother->ptr[brother->num];
+            node->num++;
 
+            parent->value[brotherIndex] = brother->value[brother->num-1];
+            brother->num--;
                 
         }
+}
+
+/**
+ * 
+*/
+Np * previous(BTNode * node,int valueIndex){
+    Np * np = malloc(sizeof(NP));
+   if(node->isLeaf){
+        np->pr = node ;
+        if(valueIndex >= 1)
+            np->index = valueIndex - 1;
+        else np->index = 0;
+        return np;
+   } 
+   node = node->ptr[valueIndex];
+   while(node->[node->num] != NULL){
+     node = node->[node->num];
+   }
+   np->pr = node ;
+   np->index = node->num -1;
+   return np;
+}
+
+Np * next(BTNode * node,int valueIndex){
+    Np * np = malloc(sizeof(NP));
+    if(node->isLeaf){
+        np->pr = node;
+        node->index = 0;
+        return np;
+    }
+    node = node->ptr[valueIndex+1];
+    whlie(!node->isleaf){
+        node->node->ptr[0];
+    }
+    np->pr = node;
+    np->index = 0;
+    return np;
 }
 
 void delete_check_child(BTNode *node, int prIndex)
@@ -243,39 +301,36 @@ void delete_check_child(BTNode *node, int prIndex)
     }
 }
 
-void delete_node(int key)
+
+
+void delete_on_node(BTNode * pr, int key)
 {
-    BTNode *pr = root;
     int i = pr->num - 1;
     while (i >= 0 && pr->value[i] > key)
     {
         i--;
     }
-    if (i < 0)
-    {
-    }
-    else if (key == pr->value[i])
-    {
-        if (pr->isLeaf)
-        {
-            delete_on_node(pr, i);
-        }
-        else
-        {
-            if (pr->ptr[i]->num > t - 1)
-            {
+    if(i < 0){  
+       if(pr->isLeaf) return; 
+       if(pr->ptr[0]->num >= t){
+           delete(pr->ptr[0], key); 
+       }else{
+            if(pr->ptr[1]->num >= t){
+               borrow_brother_one(pr,0,1); 
+            }else {
+                merge_brother_node(pr,0,1);
             }
-            else if (pr->ptr[i + 1]->num > t - 1)
-            {
-            }
-            else
-            {
-            }
-        }
+       } 
+    }else if(pr->value[i] == key){
+       if(pr->isLeaf){
+
+       }else{
+
+       }
+    }else {
+
     }
-    else
-    {
-    }
+    
 }
 
 int main(int argc, char *argv[])
